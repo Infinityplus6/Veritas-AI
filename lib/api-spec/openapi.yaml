@@ -1,0 +1,156 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: API specification
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: detection
+    description: Deepfake detection operations
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+  /model/status:
+    get:
+      operationId: getModelStatus
+      tags: [detection]
+      summary: Model readiness status
+      description: Whether the CNN model is loaded and ready for inference
+      responses:
+        "200":
+          description: Model status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ModelStatus"
+  /samples:
+    get:
+      operationId: listSamples
+      tags: [detection]
+      summary: List sample images
+      description: Preloaded example images from the model's own dataset
+      responses:
+        "200":
+          description: Sample images
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SampleImage"
+  /predict:
+    post:
+      operationId: predictImage
+      tags: [detection]
+      summary: Run deepfake detection on an image
+      description: Accepts a base64-encoded image and returns the model prediction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PredictionInput"
+      responses:
+        "200":
+          description: Prediction result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PredictionResult"
+        "400":
+          description: Invalid image
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorMessage"
+        "503":
+          description: Model not ready yet
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorMessage"
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+    ModelStatus:
+      type: object
+      properties:
+        ready:
+          type: boolean
+        message:
+          type: string
+      required:
+        - ready
+        - message
+    SampleImage:
+      type: object
+      properties:
+        id:
+          type: string
+        label:
+          type: string
+          description: Ground-truth label of the sample ("Real" or "AI-Generated")
+        url:
+          type: string
+          description: URL to fetch the sample image (relative, includes /api prefix)
+      required:
+        - id
+        - label
+        - url
+    PredictionInput:
+      type: object
+      properties:
+        imageBase64:
+          type: string
+          description: Base64-encoded image bytes (no data URL prefix required, but accepted)
+      required:
+        - imageBase64
+    PredictionResult:
+      type: object
+      properties:
+        label:
+          type: string
+          description: Predicted label ("Real" or "AI-Generated")
+        probAiGenerated:
+          type: number
+          description: Model probability that the image is AI-generated (0-1)
+        probReal:
+          type: number
+          description: Probability that the image is real (0-1)
+        confidence:
+          type: number
+          description: Confidence in the predicted label (0.5-1)
+      required:
+        - label
+        - probAiGenerated
+        - probReal
+        - confidence
+    ApiErrorMessage:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error

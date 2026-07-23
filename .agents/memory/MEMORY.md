@@ -1,0 +1,2 @@
+- [huggingface-hub pip blocked](hf-hub-package-blocked.md) — package firewall rejects all versions; fetch HF Hub files via direct HTTPS instead.
+- [Deployment health probes](deploy-health-probes.md) — every artifact.toml service needs a 200-returning startup health path, or publish fails at promote with no runtime logs.

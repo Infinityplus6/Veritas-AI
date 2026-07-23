@@ -1,0 +1,27 @@
+kind = "web"
+previewPath = "/"
+title = "Veritas AI"
+version = "1.0.0"
+id = "artifacts/veritas-ai"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 26027
+
+[services.development]
+run = "pnpm --filter @workspace/veritas-ai run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/veritas-ai", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/veritas-ai/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "26027"
+BASE_PATH = "/"
