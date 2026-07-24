@@ -9,6 +9,7 @@
 ---
 check it out <a href=https://veritas-ai-801058.replit.app/>here</a>
 
+Current Accuracy: 85.6%
 </div>
 
 ---
